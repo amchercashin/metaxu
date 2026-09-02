@@ -1,0 +1,75 @@
+{
+  "id": "RIVER_01",
+  "title": "Чтение воды",
+  "gesture": "read_water",
+  "biome_tags": ["river", "mist"],
+  "requires": [],
+  "forbidden_if": [],
+  "primary_bearer": "either",
+  "ribbonOrder": 40,
+  "setup": [
+    "Туман врёт про дальность. Поверхность гладкая, как если бы брод уже был найден.",
+    "Клеон: «Блеск врёт. Смотри не на зеркало — на линию.»",
+    "Аристон щурится: «Здесь вода толще. Или я путаю толщу со страхом.»"
+  ],
+  "choices": [
+    {
+      "id": "watch_current",
+      "label": "Стоять и смотреть течение",
+      "speaker": "ariston",
+      "line": "Аристон: «Видишь линию? Под ложью блеска — камень. Здесь можно ступить.»",
+      "effects": {
+        "flags": { "knows_ford": true },
+        "body": { "both": { "cold": 0.08, "fatigue": 0.06 } },
+        "recap": "Они прочли воду. Знают, где брод.",
+        "outcome": "true_ford"
+      }
+    },
+    {
+      "id": "throw_float",
+      "label": "Бросить сухую ветку",
+      "speaker": "kleon",
+      "line": "Клеон бросает. Ветка уходит косо, не туда, куда звал блеск.",
+      "effects": {
+        "flags": { "knows_ford": true },
+        "body": { "kleon": { "fatigue": 0.03 } },
+        "recap": "Ветка выдала ложный покой. Брод левее.",
+        "outcome": "true_ford"
+      }
+    },
+    {
+      "id": "ask_companion",
+      "label": "Спросить спутника",
+      "speaker": "kleon",
+      "line": "Аристон медлит и ошибается в голосе: «Кажется, прямо.» Клеон не уверен, но кивает.",
+      "effects": {
+        "body": { "both": { "fatigue": 0.02 } },
+        "recap": "Поверили друг другу слишком рано. Покой поверхности остался ложью.",
+        "outcome": "false_calm"
+      }
+    },
+    {
+      "id": "enter_now",
+      "label": "Войти сразу",
+      "speaker": "kleon",
+      "line": "Клеон: «Если стоять — замёрзнем умнее.» Вода берёт колени раньше, чем мысль.",
+      "effects": {
+        "body": { "kleon": { "cold": 0.2, "wet": true, "wound": 0.08 }, "ariston": { "cold": 0.1 } },
+        "recap": "Ложный вход. День ещё длинен, но стопа уже помнит камень, которого не было.",
+        "outcome": "false_calm"
+      }
+    },
+    {
+      "id": "search_downstream",
+      "label": "Искать ниже по течению",
+      "speaker": "ariston",
+      "line": "Аристон: «Безопаснее час ног, чем минута лжи.» Солнце садится в плечи.",
+      "effects": {
+        "flags": { "knows_ford": true },
+        "body": { "both": { "fatigue": 0.15, "satiety": -0.12, "thirst": 0.1 } },
+        "recap": "Нашли брод ниже. Потеряли часы. Вечером будут голоднее.",
+        "outcome": "lost_hours"
+      }
+    }
+  ]
+}

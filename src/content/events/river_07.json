@@ -1,0 +1,74 @@
+{
+  "id": "RIVER_07",
+  "title": "Молчаливый на том берегу",
+  "gesture": "silence",
+  "biome_tags": ["far_bank", "temple_distance"],
+  "requires": [],
+  "forbidden_if": [],
+  "primary_bearer": "ariston",
+  "ribbonOrder": 80,
+  "setup": [
+    "На том берегу сидит человек. Не зовёт. Не гуру. Может быть, просто не хочет греков.",
+    "Аристон чувствует, как речь чешется в зубах.",
+    "Клеон уже придумал приветствие."
+  ],
+  "choices": [
+    {
+      "id": "pass",
+      "label": "Пройти мимо",
+      "speaker": "ariston",
+      "line": "Аристон не кивает. Спины расходятся. Жест запомнится позже, в городе у камней.",
+      "effects": {
+        "flags": { "left_silent_man": true },
+        "recap": "Прошли мимо. Не всякая встреча обязана стать беседой — и это тоже цена.",
+        "outcome": "left"
+      }
+    },
+    {
+      "id": "sit_nearby_silent",
+      "label": "Сесть рядом молча",
+      "speaker": "ariston",
+      "line": "Песок принимает ещё два тела. Он не смотрит. Этого достаточно.",
+      "effects": {
+        "flags": { "spoke_to_silent_man": true, "knows_ford": true },
+        "body": { "both": { "fatigue": 0.04, "thirst": 0.04 } },
+        "recap": "Посидели в чужом молчании. Жестом он показал мель — или они сами её увидели.",
+        "outcome": "sat"
+      }
+    },
+    {
+      "id": "greet",
+      "label": "Поприветствовать",
+      "speaker": "kleon",
+      "line": "Клеон говорит тепло. Человек встаёт и уходит. Речь была слишком быстрой.",
+      "effects": {
+        "flags": { "left_silent_man": true },
+        "recap": "Приветствие закрыло дверь. Он ушёл.",
+        "outcome": "greeted"
+      }
+    },
+    {
+      "id": "offer_food",
+      "label": "Предложить пищу",
+      "speaker": "kleon",
+      "line": "Лепёшка на песке. Он не берёт и не гонит. Клеон краснеет без причины.",
+      "effects": {
+        "flags": { "spoke_to_silent_man": true },
+        "body": { "kleon": { "satiety": -0.06 } },
+        "recap": "Пища осталась между ними. Ни дар, ни отказ.",
+        "outcome": "offered"
+      }
+    },
+    {
+      "id": "ask_ford",
+      "label": "Спросить про брод",
+      "speaker": "ariston",
+      "line": "Аристон спрашивает коротко. Палец человека чуть движется вниз по течению. Потом снова камень.",
+      "effects": {
+        "flags": { "spoke_to_silent_man": true, "knows_ford": true },
+        "recap": "Молчаливый указал брод жестом. Слов не было — и этого хватило.",
+        "outcome": "ford_shown"
+      }
+    }
+  ]
+}

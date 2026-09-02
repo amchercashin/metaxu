@@ -1,0 +1,95 @@
+{
+  "id": "RIVER_06",
+  "title": "Зверь в камыше",
+  "gesture": "beast",
+  "biome_tags": ["palm_lowland", "reeds"],
+  "requires": [],
+  "forbidden_if": [],
+  "primary_bearer": "either",
+  "ribbonOrder": 30,
+  "setup": [
+    "Камыш расступается не от ветра. Сначала животное — не символ.",
+    "За ним, может быть, детёныш. Глаза не слушают вашу беседу.",
+    "Клеон уже открыл рот для красивой мысли."
+  ],
+  "choices": [
+    {
+      "id": "stop",
+      "label": "Остановиться",
+      "speaker": "ariston",
+      "line": "Аристон касается локтя Клеона. Зверь дышит. Они дышат. Потом камыш снова только камыш.",
+      "effects": {
+        "body": { "both": { "fatigue": 0.04 } },
+        "recap": "Остановились. Разошлись. Мир не был аудиторией.",
+        "outcome": "parted"
+      }
+    },
+    {
+      "id": "back",
+      "label": "Пятиться",
+      "speaker": "kleon",
+      "line": "Клеон считает шаги назад. Горло сухое. Зверь не следует.",
+      "effects": {
+        "body": { "kleon": { "fatigue": 0.06 } },
+        "recap": "Отступили. Час обхода или просто страх в коленях.",
+        "outcome": "backed"
+      }
+    },
+    {
+      "id": "occupy_space",
+      "label": "Занять пространство",
+      "speaker": "ariston",
+      "line": "Аристон становится шире, без крика. Зверь уступает воду, не честь.",
+      "effects": {
+        "body": { "ariston": { "fatigue": 0.08 } },
+        "recap": "Заняли место. Не ударили. Вода осталась общей.",
+        "outcome": "space"
+      }
+    },
+    {
+      "id": "strike",
+      "label": "Ударить",
+      "speaker": "kleon",
+      "line": "Камень в ладони. Коротко. Зверь падает тяжелее мысли, которая должна была прийти после.",
+      "bodyCheck": {
+        "hero": "leader",
+        "demand": "strike",
+        "threshold": 0.45,
+        "pass": {
+          "flags": { "killed_animal": true },
+          "body": { "leader": { "fatigue": 0.12, "wound": 0.05 } },
+          "recap": "Убили. Вечер будет без мяса или с мясом, которое не лезет в горло.",
+          "outcome": "killed"
+        },
+        "fail": {
+          "flags": { "killed_animal": true },
+          "body": { "leader": { "wound": 0.28, "fatigue": 0.2 }, "both": { "fatigue": 0.08 } },
+          "recap": "Удар прошёл криво. Рана человеку, смерть зверю. Вечер другой.",
+          "outcome": "killed_wounded"
+        }
+      }
+    },
+    {
+      "id": "flee",
+      "label": "Бежать",
+      "speaker": "kleon",
+      "line": "Камыш хлещет лицо. Обход длинен. Солнце сместилось.",
+      "effects": {
+        "body": { "both": { "fatigue": 0.18, "satiety": -0.08 } },
+        "recap": "Бежали. Потеряли часы. Вечер короче.",
+        "outcome": "fled"
+      }
+    },
+    {
+      "id": "give_food",
+      "label": "Бросить пищу",
+      "speaker": "ariston",
+      "line": "Лепёшка в камыш. Зверь берёт не как дар — как находку. Они обходят стороной.",
+      "effects": {
+        "body": { "both": { "satiety": -0.1 } },
+        "recap": "Отдали хлеб. Животное осталось животным.",
+        "outcome": "fed"
+      }
+    }
+  ]
+}

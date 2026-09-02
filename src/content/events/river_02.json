@@ -1,0 +1,95 @@
+{
+  "id": "RIVER_02",
+  "title": "Тонущий",
+  "gesture": "rescue",
+  "biome_tags": ["river"],
+  "requires": [],
+  "forbidden_if": [],
+  "primary_bearer": "either",
+  "ribbonOrder": 50,
+  "setup": [
+    "Человек бьёт воду ладонью. Свиток у Клеона за спиной тяжелеет без причины.",
+    "Клеон уже наклонён к берегу.",
+    "Аристон: «Ноша не умеет плавать. И человек тоже, если ты возьмёшь оба.»"
+  ],
+  "choices": [
+    {
+      "id": "drop_scroll_and_swim",
+      "label": "Бросить свиток и плыть",
+      "speaker": "kleon",
+      "line": "Клеон срывает ремень. Свиток бьётся о камень. Руки находят чужое запястье.",
+      "effects": {
+        "flags": { "saved_drowning": true },
+        "scroll": "lost",
+        "body": { "kleon": { "wet": true, "cold": 0.25, "fatigue": 0.2 } },
+        "recap": "Человек на берегу. Свиток — уже речь реки.",
+        "outcome": "saved_lost"
+      }
+    },
+    {
+      "id": "swim_with_scroll",
+      "label": "Плыть со свитком",
+      "speaker": "ariston",
+      "line": "Аристон: «Держи и его, и текст.» Это может быть ошибка старшего.",
+      "bodyCheck": {
+        "hero": "leader",
+        "demand": "swim_burden",
+        "threshold": 0.52,
+        "pass": {
+          "flags": { "saved_drowning": true },
+          "scroll": "wet",
+          "body": { "leader": { "wet": true, "cold": 0.2, "fatigue": 0.18 } },
+          "recap": "Вытащили обоих: человека и мокрый свиток.",
+          "outcome": "saved_wet"
+        },
+        "fail": {
+          "flags": { "saved_drowning": true },
+          "scroll": "wet",
+          "body": {
+            "both": { "wet": true, "cold": 0.3, "fatigue": 0.25, "wound": 0.18 }
+          },
+          "recap": "Оба мокрые, рана на ребре. Свиток под угрозой — чернила уже плывут.",
+          "outcome": "fail_body"
+        }
+      }
+    },
+    {
+      "id": "throw_rope",
+      "label": "Кинуть верёвку",
+      "speaker": "ariston",
+      "line": "Верёвка коротка. Человек ловит. Свиток остаётся сухим за спиной.",
+      "effects": {
+        "flags": { "saved_drowning": true },
+        "scroll": "intact",
+        "body": { "ariston": { "fatigue": 0.1 } },
+        "recap": "Верёвка выдержала. Свиток цел. Человек кашляет тиной.",
+        "outcome": "saved_intact"
+      }
+    },
+    {
+      "id": "shout_to_other",
+      "label": "Крикнуть спутнику",
+      "speaker": "kleon",
+      "line": "Клеон: «Ты плотнее!» Аристон входит. Свиток остаётся на младшем.",
+      "effects": {
+        "flags": { "saved_drowning": true },
+        "scroll": "intact",
+        "body": { "ariston": { "wet": true, "cold": 0.22, "fatigue": 0.16 } },
+        "recap": "Старший вытащил. Младший унёс свиток. Вес дня лег на одно плечо.",
+        "outcome": "saved_intact"
+      }
+    },
+    {
+      "id": "do_not_enter",
+      "label": "Не входить",
+      "speaker": "ariston",
+      "line": "Аристон держит Клеона за ремень. Вода выравнивается. Потом — пусто.",
+      "effects": {
+        "flags": { "ignored_drowning": true },
+        "scroll": "intact",
+        "recap": "Свиток цел. Вечером стыд будет толще воды.",
+        "outcome": "ignored_intact"
+      }
+    }
+  ]
+}

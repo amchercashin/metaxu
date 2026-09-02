@@ -1,0 +1,70 @@
+{
+  "id": "RIVER_08",
+  "title": "Промокший фрагмент",
+  "gesture": "wet_fragment",
+  "biome_tags": ["river"],
+  "requires": ["scroll_present"],
+  "forbidden_if": ["scroll_lost"],
+  "primary_bearer": "either",
+  "ribbonOrder": 70,
+  "setup": [
+    "Даже без героизма вода берёт знание. Край свитка тёмен и тяжёл.",
+    "Третий фрагмент досье расплылся. Река не обязана награждать добродетель.",
+    "Аристон держит его на свету, как рану."
+  ],
+  "choices": [
+    {
+      "id": "dry_now",
+      "label": "Сушить сейчас",
+      "speaker": "ariston",
+      "line": "Расстелили на камне. Ветер врёт, что успеют. Чернила уже увели одну посылку.",
+      "effects": {
+        "flags": { "scroll_wet": true },
+        "scroll": "wet",
+        "lostFragmentId": "3",
+        "body": { "both": { "fatigue": 0.06 } },
+        "recap": "Сушили. Фрагмент id=3 нечитаем. Свиток мокр.",
+        "outcome": "dried_lost_fragment"
+      }
+    },
+    {
+      "id": "rewrite_from_memory",
+      "label": "Переписать по памяти",
+      "speaker": "ariston",
+      "line": "Аристон пишет увереннее, чем помнит. Клеон видит лишнюю черту и молчит — или не видит.",
+      "effects": {
+        "flags": { "scroll_wet": true, "scroll_corrupt": true },
+        "scroll": "wet",
+        "lostFragmentId": "3",
+        "recap": "Перепись по памяти ввела ошибку. Свиток порчен.",
+        "outcome": "corrupt"
+      }
+    },
+    {
+      "id": "accept_loss",
+      "label": "Принять потерю",
+      "speaker": "kleon",
+      "line": "Клеон: «Знание не висит в воздухе. Оно было тканью.» Аристон кивает слишком быстро, как будто рад, что не надо чинить.",
+      "effects": {
+        "flags": { "scroll_wet": true },
+        "scroll": "wet",
+        "lostFragmentId": "3",
+        "recap": "Приняли потерю. В финальном споре не хватит именно этой посылки.",
+        "outcome": "accepted"
+      }
+    },
+    {
+      "id": "blame_companion",
+      "label": "Винить спутника",
+      "speaker": "kleon",
+      "line": "Клеон: «Ты нёс криво.» Аристон: «Ты входил первым.» Спор дня портится, вода уже сделала своё.",
+      "effects": {
+        "flags": { "scroll_wet": true },
+        "scroll": "wet",
+        "lostFragmentId": "3",
+        "recap": "Обвинение легло между ними. Фрагмент всё равно нечитаем.",
+        "outcome": "blamed"
+      }
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "RIVER_03",
+  "title": "Следы ночного перехода",
+  "gesture": "tracks",
+  "biome_tags": ["river_bank", "sand"],
+  "requires": [],
+  "forbidden_if": [],
+  "primary_bearer": "kleon",
+  "ribbonOrder": 20,
+  "setup": [
+    "На сыром песке — стопы. Не ваши. Ночь уже шла.",
+    "Клеон садится на корточки: «Они не прятались. Или прятались лучше нас.»",
+    "Аристон: «Не клади свой страх сверху следа.»"
+  ],
+  "choices": [
+    {
+      "id": "follow",
+      "label": "Идти по следу",
+      "speaker": "kleon",
+      "line": "Клеон: «Пусть ведут. Мы не центр этой реки.»",
+      "effects": {
+        "flags": { "followed_night_tracks": true, "knows_others_crossed": true },
+        "body": { "both": { "fatigue": 0.08 } },
+        "recap": "Пошли по чужому ночному следу. Встреча ещё впереди — не обязательно сегодня.",
+        "outcome": "followed"
+      }
+    },
+    {
+      "id": "parallel",
+      "label": "Идти рядом, не ступая в след",
+      "speaker": "ariston",
+      "line": "Аристон: «Знать, что шли, — не значит стать ими.»",
+      "effects": {
+        "flags": { "knows_others_crossed": true },
+        "body": { "ariston": { "fatigue": 0.05 } },
+        "recap": "Прочли след, не взяли его в ноги. Знают: другие уже перешли.",
+        "outcome": "knows_others"
+      }
+    },
+    {
+      "id": "ignore",
+      "label": "Не смотреть",
+      "speaker": "ariston",
+      "line": "Аристон: «Утро чистое, если не читать чужое.» Мир беднее на один слух.",
+      "effects": {
+        "recap": "След остался чужим. Утро легче. Мир уже.",
+        "outcome": "ignored"
+      }
+    },
+    {
+      "id": "hide_and_wait",
+      "label": "Спрятаться и ждать",
+      "speaker": "kleon",
+      "line": "Камыш чешется о плечо. Никто не приходит. Только река.",
+      "effects": {
+        "flags": { "knows_others_crossed": true },
+        "body": { "both": { "cold": 0.1, "fatigue": 0.07 } },
+        "recap": "Ждали. След остыл. Знают, что кто-то перешёл раньше.",
+        "outcome": "waited"
+      }
+    }
+  ]
+}

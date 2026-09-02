@@ -1,0 +1,86 @@
+{
+  "id": "RIVER_05",
+  "title": "Сборщик брода",
+  "gesture": "keeper",
+  "biome_tags": ["ford", "inhabited_edge"],
+  "requires": [],
+  "forbidden_if": [],
+  "primary_bearer": "ariston",
+  "ribbonOrder": 60,
+  "setup": [
+    "У мели стоит человек с посохом. Не карикатура. У него закон места.",
+    "Он: «Имя. Или медь. Или свиток, если имена ваши лживы.»",
+    "Аристон чувствует вес своего настоящего имени, как монету, которую жалко и стыдно прятать."
+  ],
+  "choices": [
+    {
+      "id": "give_true_name",
+      "label": "Сказать истинное имя",
+      "speaker": "ariston",
+      "line": "Аристон: «Аристон, сын школы.» Сборщик кивает, как судья, не как друг.",
+      "effects": {
+        "flags": { "named_to_stranger": true },
+        "recap": "Истинное имя отдано чужому закону. Оно вернётся.",
+        "outcome": "named"
+      }
+    },
+    {
+      "id": "give_road_name",
+      "label": "Сказать дорожное имя",
+      "speaker": "ariston",
+      "line": "Аристон: «Гость.» Сборщик усмехается: «Гость платит дважды, когда его находят.»",
+      "effects": {
+        "flags": { "debt_ford_keeper": true },
+        "debtsAdd": [{ "id": "ford_keeper", "to": "сборщик брода", "note": "ложное дорожное имя" }],
+        "recap": "Сказали дорожное имя. Долг легче меди и тяжелее правды.",
+        "outcome": "road_name"
+      }
+    },
+    {
+      "id": "pay",
+      "label": "Заплатить",
+      "speaker": "ariston",
+      "line": "Медь звенит. Сборщик пропускает. Свиток не тронут.",
+      "effects": {
+        "body": { "both": { "satiety": -0.05 } },
+        "recap": "Закон места сыт медью. Имена остаются при них.",
+        "outcome": "paid"
+      }
+    },
+    {
+      "id": "refuse",
+      "label": "Отказать",
+      "speaker": "ariston",
+      "line": "Аристон: «Река не твоя.» Сборщик не спорит — он запоминает спины.",
+      "effects": {
+        "flags": { "debt_ford_keeper": true },
+        "debtsAdd": [{ "id": "ford_keeper", "to": "сборщик брода", "note": "отказ в плате" }],
+        "recap": "Отказ. Долг всё равно записан — чужой рукой.",
+        "outcome": "refused"
+      }
+    },
+    {
+      "id": "threaten",
+      "label": "Угрожать",
+      "speaker": "kleon",
+      "line": "Клеон делает шаг. Сборщик не пятится. «Свиток.» Клеон чуть не отдает его жестом.",
+      "effects": {
+        "scroll": "given",
+        "recap": "Угроза кончилась отдачей. Закон места сытее их учения.",
+        "outcome": "scroll_given"
+      }
+    },
+    {
+      "id": "let_younger_speak",
+      "label": "Дать говорить младшему",
+      "speaker": "kleon",
+      "line": "Клеон: «Мы ищем след мудреца, не вашу мель.» Сборщик слышит красоту и не верит ей.",
+      "effects": {
+        "flags": { "named_to_stranger": true, "debt_ford_keeper": true },
+        "debtsAdd": [{ "id": "ford_keeper", "to": "сборщик брода", "note": "речь младшего без платы" }],
+        "recap": "Младший говорил красиво. Имя всё равно взято, долг жив.",
+        "outcome": "younger_spoke"
+      }
+    }
+  ]
+}
