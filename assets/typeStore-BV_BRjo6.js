@@ -1,2 +1,0 @@
-import{t as e}from"./observable.pure-BmPG9gPP.js";var t=class{static get LastCreatedEngine(){return this.Instances.length===0?null:this.Instances[this.Instances.length-1]}static get LastCreatedScene(){return this._LastCreatedScene}};t.Instances=[],t.OnEnginesDisposedObservable=new e,t._LastCreatedScene=null,t.UseFallbackTexture=!0,t.FallbackTexture=``;var n={};function r(e,t){n[e]=t}function i(e){return n[e]}export{r as n,t as r,i as t};
-//# sourceMappingURL=typeStore-BV_BRjo6.js.map
