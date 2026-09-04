@@ -59,6 +59,7 @@ export interface AbderaWorld {
   ground: Mesh;
   shadow: ShadowGenerator;
   sun: DirectionalLight;
+  environmentReady: Promise<void>;
   landmarks: AbderaLandmarkAnchor[];
   encounterRoot: TransformNode;
   spawn: Vector3;
@@ -387,7 +388,7 @@ export function buildAbderaWorld(scene: Scene, camera: ArcRotateCamera): AbderaW
   ground.receiveShadows = true;
   ground.checkCollisions = true;
 
-  createAbderaEnvironment(scene);
+  const environmentReady = createAbderaEnvironment(scene);
   buildSky(scene);
   buildDistantHills(scene);
   buildSea(scene);
@@ -456,6 +457,7 @@ export function buildAbderaWorld(scene: Scene, camera: ArcRotateCamera): AbderaW
     ground,
     shadow,
     sun,
+    environmentReady,
     landmarks,
     encounterRoot,
     spawn: new Vector3(-2, abderaGroundHeight(-2, 0), 0),

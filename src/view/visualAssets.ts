@@ -82,7 +82,11 @@ export function createSurfaceMaterial(
   return material;
 }
 
-export function createAbderaEnvironment(scene: Scene): HDRCubeTexture {
+export function createAbderaEnvironment(scene: Scene): Promise<void> {
+  let markReady: () => void = () => undefined;
+  const ready = new Promise<void>((resolve) => {
+    markReady = resolve;
+  });
   const environment = new HDRCubeTexture(
     `${assetRoot}/hdris/toposcope_sunset_1k.hdr`,
     scene,
@@ -91,12 +95,14 @@ export function createAbderaEnvironment(scene: Scene): HDRCubeTexture {
     true,
     false,
     true,
+    markReady,
+    markReady,
   );
   environment.name = "toposcope-sunset-environment";
   environment.rotationY = 1.74;
   scene.environmentTexture = environment;
   scene.environmentIntensity = 0.72;
-  return environment;
+  return ready;
 }
 
 function placeContainerInstances(

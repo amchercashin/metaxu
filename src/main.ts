@@ -600,10 +600,9 @@ async function boot(): Promise<void> {
     paint();
   });
 
-  // HDR radiance filtering swaps the source cube texture on WebGPU. Starting
-  // the gameplay render loop before Babylon releases that pending task can
-  // submit a frame that still references the disposed source texture.
-  await scene.whenReadyAsync();
+  // HDR radiance filtering swaps the source cube texture on WebGPU. Wait only
+  // for that task—not every asynchronously streamed prop—before rendering.
+  await world.environmentReady;
 
   engine.runRenderLoop(() => {
     const now = performance.now();
