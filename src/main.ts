@@ -1,5 +1,4 @@
 import "./ui/journey.css";
-import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Scene } from "@babylonjs/core/scene";
 import {
@@ -40,8 +39,8 @@ import {
 import { JourneySaveStore } from "./ui/journeySave";
 import { buildAbderaWorld, abderaGroundHeight, type AbderaLandmarkAnchor } from "./view/abderaWorld";
 import { createGameEngine } from "./view/engine";
-import { enableHavok } from "./view/havok";
 import { createInput } from "./view/input";
+import { createTravelCamera } from "./view/travelCamera";
 import {
   addActorShadows,
   animateIdleActors,
@@ -209,25 +208,10 @@ async function boot(): Promise<void> {
   });
   engine.setHardwareScalingLevel(Math.max(1, (window.devicePixelRatio || 1) / 1.65));
   const scene = new Scene(engine);
-  // Start directly behind the pair and look east along the road. The earlier
-  // oblique angle put the camera inside Abdera's southern wall.
-  const camera = new ArcRotateCamera("travel-camera", Math.PI, 1.05, 11.5, new Vector3(-2, 1.9, 0), scene);
-  camera.lowerRadiusLimit = 7.5;
-  camera.upperRadiusLimit = 24;
-  camera.lowerBetaLimit = 0.62;
-  camera.upperBetaLimit = 1.34;
-  camera.wheelPrecision = 36;
-  camera.panningSensibility = 0;
-  camera.inertia = 0.76;
-  camera.minZ = 0.08;
-  camera.attachControl(canvas, true);
-  camera.keysUp = [];
-  camera.keysDown = [];
-  camera.keysLeft = [];
-  camera.keysRight = [];
-  scene.activeCamera = camera;
+  const initialCameraFocus = new Vector3(-2, abderaGroundHeight(-2, 0) + 1.35, 0);
+  const travelCamera = createTravelCamera(scene, canvas, initialCameraFocus);
+  const camera = travelCamera.camera;
 
-  const havok = await enableHavok(scene);
   const world = buildAbderaWorld(scene, camera);
   const shrine = world.landmarks.find((landmark) => landmark.id === "road-shrine");
   if (!shrine) throw new Error("В мире нет дорожного святилища");
@@ -235,6 +219,11 @@ async function boot(): Promise<void> {
     ? new Vector3(shrine.position.x - 5.5, abderaGroundHeight(shrine.position.x - 5.5, shrine.position.z), shrine.position.z)
     : world.spawn;
   const party = createTravelParty(scene, qaSpawn);
+  travelCamera.snapTo({
+    leaderPosition: party.kleon.root.position,
+    companionPosition: party.ariston.root.position,
+    leaderVelocity: party.kleon.velocity,
+  });
   for (const hero of [party.kleon, party.ariston]) {
     addActorShadows(hero, (mesh) => world.shadow.addShadowCaster(mesh));
   }
@@ -265,11 +254,20 @@ async function boot(): Promise<void> {
   let lastExploreCheck = 0;
   let whisperUntil = 0;
   let toastTimer = 0;
+  let controlsHintTimer = 0;
+  let controlsHintVisible = false;
   let lastInteractionId: string | null = null;
 
   const hud = mountJourneyHud(document.getElementById("ui-root")!, {
     onStart() {
       runtime.mode = "travel";
+      controlsHintVisible = true;
+      window.clearTimeout(controlsHintTimer);
+      controlsHintTimer = window.setTimeout(() => {
+        if (!controlsHintVisible) return;
+        controlsHintVisible = false;
+        paint();
+      }, 9000);
       speak("Неизвестное начинается не там, где кончается карта, а там, где она перестаёт притворяться миром.", 6200);
       canvas.focus();
       paint();
@@ -573,8 +571,12 @@ async function boot(): Promise<void> {
     const model: JourneyHudModel = {
       mode: runtime.mode,
       backend,
-      havok: havok.ok,
+      // Current travel and menu-combat are kinematic; do not make every player
+      // download and compile the unused Havok runtime before first paint.
+      havok: false,
       fps,
+      showTechnicalDetails: import.meta.env.DEV,
+      showControls: controlsHintVisible,
       leader: runtime.leader,
       objective: runtime.objective,
       location: runtime.location,
@@ -597,6 +599,11 @@ async function boot(): Promise<void> {
     engine.resize();
     paint();
   });
+
+  // HDR radiance filtering swaps the source cube texture on WebGPU. Starting
+  // the gameplay render loop before Babylon releases that pending task can
+  // submit a frame that still references the disposed source texture.
+  await scene.whenReadyAsync();
 
   engine.runRenderLoop(() => {
     const now = performance.now();
@@ -636,14 +643,23 @@ async function boot(): Promise<void> {
     );
     animateIdleActors(guards.filter((guard) => guard.root.isEnabled()), dt);
 
+    if (!blocked && stepped.moved && controlsHintVisible) {
+      controlsHintVisible = false;
+      window.clearTimeout(controlsHintTimer);
+      paint();
+    }
+
     if (!blocked && stepped.moved && canSprint) {
       runtime.stamina = Math.max(0, runtime.stamina - dt * 7.5);
     } else if (runtime.mode === "travel") {
       runtime.stamina = Math.min(100, runtime.stamina + dt * 4.2);
     }
 
-    const lookAt = party.kleon.root.position.add(party.ariston.root.position).scale(0.5).add(new Vector3(0, 1.35, 0));
-    camera.setTarget(Vector3.Lerp(camera.getTarget(), lookAt, 1 - Math.pow(0.025, dt * 60)));
+    travelCamera.update({
+      leaderPosition: stepped.leader.root.position,
+      companionPosition: stepped.follower.root.position,
+      leaderVelocity: stepped.leader.velocity,
+    }, dt);
 
     if (runtime.mode === "travel" && !hud.isMapOpen()) {
       updateExploration(now, stepped.leader.root.position);
@@ -662,7 +678,7 @@ async function boot(): Promise<void> {
       whisperUntil = 0;
       paint();
     }
-    if (now - lastFpsUpdate > 900) {
+    if (import.meta.env.DEV && now - lastFpsUpdate > 900) {
       fps = engine.getFps();
       lastFpsUpdate = now;
       paint();

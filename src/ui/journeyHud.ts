@@ -39,6 +39,8 @@ export interface JourneyHudModel {
   backend: "webgpu" | "webgl2";
   havok: boolean;
   fps: number;
+  showTechnicalDetails: boolean;
+  showControls: boolean;
   leader: HeroId;
   objective: string;
   location: string;
@@ -119,7 +121,9 @@ function renderMap(
   compact: boolean,
 ): void {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const cssSize = compact ? 190 : Math.min(620, window.innerWidth - 40, window.innerHeight - 150);
+  const cssSize = compact
+    ? (window.innerWidth <= 800 ? 112 : 144)
+    : Math.min(620, window.innerWidth - 40, window.innerHeight - 150);
   canvas.style.width = `${cssSize}px`;
   canvas.style.height = `${cssSize}px`;
   canvas.width = Math.max(1, Math.floor(cssSize * dpr));
@@ -233,7 +237,7 @@ export function mountJourneyHud(root: HTMLElement, handlers: JourneyHudHandlers)
         <p>Абдера, около 430 года до н. э.</p>
         <p class="intro-lead">Двое выходят на восточную дорогу по следу слуха, который приписывают Демокриту. Карта знает меньше, чем путники.</p>
         <button id="start" type="button">Выйти за ворота</button>
-        <small>Игровая итерация 0.2 · исследование региона</small>
+        <small>Исследование региона</small>
       </div>
     </div>
     <div class="dialogue-layer hidden" id="dialogue-layer">
@@ -284,6 +288,7 @@ export function mountJourneyHud(root: HTMLElement, handlers: JourneyHudHandlers)
     whisper: root.querySelector<HTMLElement>("#whisper")!,
     interaction: root.querySelector<HTMLButtonElement>("#interaction")!,
     toast: root.querySelector<HTMLElement>("#toast")!,
+    controls: root.querySelector<HTMLElement>("#controls")!,
     dialogueEyebrow: root.querySelector<HTMLElement>("#dialogue-eyebrow")!,
     dialogueTitle: root.querySelector<HTMLElement>("#dialogue-title")!,
     dialogueCopy: root.querySelector<HTMLElement>("#dialogue-copy")!,
@@ -327,7 +332,12 @@ export function mountJourneyHud(root: HTMLElement, handlers: JourneyHudHandlers)
     elements.combat.classList.toggle("hidden", model.mode !== "combat");
     elements.era.textContent = model.yearLabel;
     elements.leader.textContent = heroName(model.leader);
-    elements.tech.textContent = `${model.backend.toUpperCase()} · ${model.havok ? "Havok" : "кинематика"} · ${Math.round(model.fps)} FPS`;
+    elements.tech.textContent = model.showTechnicalDetails
+      ? `${model.backend.toUpperCase()} · ${model.havok ? "Havok" : "кинематика"} · ${Math.round(model.fps)} FPS`
+      : "";
+    elements.tech.classList.toggle("hidden", !model.showTechnicalDetails);
+    elements.controls.classList.toggle("visible", model.showControls && model.mode === "travel");
+    elements.controls.setAttribute("aria-hidden", String(!model.showControls || model.mode !== "travel"));
     elements.objective.textContent = model.objective;
     elements.location.textContent = model.location;
     elements.stamina.style.width = `${Math.max(0, Math.min(100, model.stamina))}%`;

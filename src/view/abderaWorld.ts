@@ -37,6 +37,15 @@ import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { Scene } from "@babylonjs/core/scene";
+import {
+  coastalGroundSet,
+  createAbderaEnvironment,
+  createOliveImpostors,
+  createSurfaceMaterial,
+  loadAbderaProps,
+  roadSet,
+  weatheredStoneSet,
+} from "./visualAssets";
 
 export interface AbderaLandmarkAnchor {
   id: string;
@@ -57,6 +66,7 @@ export interface AbderaWorld {
 
 const WORLD_HALF = 104;
 const SEA_LINE = 70;
+const materialCache = new WeakMap<Scene, Map<string, PBRMaterial>>();
 
 function smoothstep(edge0: number, edge1: number, value: number): number {
   const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
@@ -102,11 +112,19 @@ export function abderaGroundHeight(x: number, z: number): number {
 }
 
 function pbr(scene: Scene, name: string, color: Color3, roughness = 0.82, metallic = 0): PBRMaterial {
+  let sceneMaterials = materialCache.get(scene);
+  if (!sceneMaterials) {
+    sceneMaterials = new Map();
+    materialCache.set(scene, sceneMaterials);
+  }
+  const cached = sceneMaterials.get(name);
+  if (cached) return cached;
   const material = new PBRMaterial(name, scene);
   material.albedoColor = color;
   material.roughness = roughness;
   material.metallic = metallic;
   material.environmentIntensity = 0.75;
+  sceneMaterials.set(name, material);
   return material;
 }
 
@@ -144,79 +162,6 @@ function makeNoiseTexture(scene: Scene, name: string, normal = false): DynamicTe
   return texture;
 }
 
-function addShadowTree(shadow: ShadowGenerator, node: TransformNode): void {
-  for (const mesh of node.getChildMeshes()) shadow.addShadowCaster(mesh);
-}
-
-function createOlive(scene: Scene, shadow: ShadowGenerator, x: number, z: number, scale: number): TransformNode {
-  const root = new TransformNode(`olive-${x.toFixed(1)}-${z.toFixed(1)}`, scene);
-  root.position.set(x, abderaGroundHeight(x, z), z);
-  root.scaling.setAll(scale);
-  const trunk = MeshBuilder.CreateCylinder("olive-trunk", {
-    height: 3.1,
-    diameterTop: 0.28,
-    diameterBottom: 0.58,
-    tessellation: 7,
-  }, scene);
-  trunk.parent = root;
-  trunk.position.y = 1.52;
-  trunk.rotation.z = (hash2(x, z) - 0.5) * 0.16;
-  trunk.material = pbr(scene, "olive-bark", new Color3(0.2, 0.14, 0.09), 0.98);
-  for (let i = 0; i < 3; i += 1) {
-    const crown = MeshBuilder.CreateIcoSphere("olive-crown", { radius: 1.45, subdivisions: 2 }, scene);
-    crown.parent = root;
-    crown.position.set((i - 1) * 0.75, 3.2 + (i % 2) * 0.28, (i % 2 ? 0.38 : -0.16));
-    crown.scaling.set(1.15, 0.55, 0.9);
-    crown.material = pbr(scene, "olive-leaf", new Color3(0.22, 0.29, 0.17), 0.9);
-  }
-  if (Math.abs(x) < 58 && Math.abs(z) < 58) addShadowTree(shadow, root);
-  return root;
-}
-
-function createCypress(scene: Scene, x: number, z: number, scale: number): TransformNode {
-  const root = new TransformNode(`cypress-${x.toFixed(1)}-${z.toFixed(1)}`, scene);
-  root.position.set(x, abderaGroundHeight(x, z), z);
-  root.scaling.setAll(scale);
-  const trunk = MeshBuilder.CreateCylinder("cypress-trunk", { height: 4.6, diameter: 0.28, tessellation: 7 }, scene);
-  trunk.parent = root;
-  trunk.position.y = 2.2;
-  trunk.material = pbr(scene, "cypress-bark", new Color3(0.17, 0.11, 0.07), 1);
-  const crown = MeshBuilder.CreateCylinder("cypress-crown", {
-    height: 7.4,
-    diameterTop: 0.18,
-    diameterBottom: 2.25,
-    tessellation: 9,
-  }, scene);
-  crown.parent = root;
-  crown.position.y = 5.5;
-  crown.material = pbr(scene, "cypress-leaf", new Color3(0.095, 0.17, 0.105), 0.95);
-  return root;
-}
-
-function createRock(scene: Scene, shadow: ShadowGenerator, x: number, z: number, size: number, warm: boolean): Mesh {
-  const rock = MeshBuilder.CreateIcoSphere(`rock-${x.toFixed(1)}-${z.toFixed(1)}`, { radius: size, subdivisions: 3 }, scene);
-  const positions = rock.getVerticesData(VertexBuffer.PositionKind);
-  if (positions) {
-    for (let i = 0; i < positions.length; i += 3) {
-      const px = positions[i];
-      const py = positions[i + 1];
-      const pz = positions[i + 2];
-      const deformation = 0.78 + hash2(px * 17 + x, pz * 19 + z) * 0.42;
-      positions[i] = px * deformation * (0.85 + hash2(x, z) * 0.5);
-      positions[i + 1] = py * deformation * (0.65 + hash2(z, x) * 0.48);
-      positions[i + 2] = pz * deformation;
-    }
-    rock.updateVerticesData(VertexBuffer.PositionKind, positions);
-    rock.createNormals(true);
-  }
-  rock.position.set(x, abderaGroundHeight(x, z) + size * 0.52, z);
-  rock.rotation.set(hash2(x, z) * 0.32, hash2(z, x) * Math.PI, hash2(x + z, z) * 0.18);
-  rock.material = pbr(scene, "thracian-stone", warm ? new Color3(0.39, 0.23, 0.14) : new Color3(0.24, 0.22, 0.19), 0.92);
-  rock.receiveShadows = true;
-  if (Math.abs(x) < 50 && Math.abs(z) < 50) shadow.addShadowCaster(rock);
-  return rock;
-}
-
 function buildRoad(scene: Scene): Mesh {
   const left: Vector3[] = [];
   const right: Vector3[] = [];
@@ -227,12 +172,14 @@ function buildRoad(scene: Scene): Mesh {
     right.push(new Vector3(x, y, z + 2.25));
   }
   const road = MeshBuilder.CreateRibbon("east-road", { pathArray: [left, right], closeArray: false, closePath: false }, scene);
-  const roadMaterial = pbr(scene, "road-dust", new Color3(0.46, 0.31, 0.19), 0.97);
-  const grain = makeNoiseTexture(scene, "road-grain");
-  grain.uScale = 18;
-  grain.vScale = 2;
-  roadMaterial.albedoTexture = grain;
-  roadMaterial.albedoColor = new Color3(0.72, 0.57, 0.38);
+  const roadMaterial = createSurfaceMaterial(
+    scene,
+    "road-rock-path",
+    roadSet,
+    42,
+    2.2,
+    new Color3(0.86, 0.72, 0.55),
+  );
   road.material = roadMaterial;
   road.receiveShadows = true;
   return road;
@@ -241,7 +188,14 @@ function buildRoad(scene: Scene): Mesh {
 function buildAbderaGate(scene: Scene, shadow: ShadowGenerator): TransformNode {
   const root = new TransformNode("abdera-gate", scene);
   root.position.set(-18, abderaGroundHeight(-18, 0), 0);
-  const limestone = pbr(scene, "abdera-limestone", new Color3(0.59, 0.48, 0.34), 0.9);
+  const limestone = createSurfaceMaterial(
+    scene,
+    "abdera-weathered-masonry",
+    weatheredStoneSet,
+    5,
+    3,
+    new Color3(0.94, 0.84, 0.68),
+  );
   for (const side of [-1, 1]) {
     const tower = MeshBuilder.CreateCylinder("gate-tower", { height: 8.2, diameter: 5.8, tessellation: 12 }, scene);
     tower.parent = root;
@@ -279,7 +233,14 @@ function buildAbderaGate(scene: Scene, shadow: ShadowGenerator): TransformNode {
 function buildRuinedShrine(scene: Scene, shadow: ShadowGenerator, position: Vector3): TransformNode {
   const root = new TransformNode("road-shrine", scene);
   root.position.copyFrom(position);
-  const stone = pbr(scene, "shrine-marble", new Color3(0.61, 0.56, 0.46), 0.82);
+  const stone = createSurfaceMaterial(
+    scene,
+    "shrine-weathered-masonry",
+    weatheredStoneSet,
+    3,
+    3,
+    new Color3(0.92, 0.85, 0.72),
+  );
   const base = MeshBuilder.CreateBox("shrine-base", { width: 8.2, depth: 6.5, height: 0.55 }, scene);
   base.parent = root;
   base.position.y = 0.28;
@@ -334,10 +295,10 @@ function buildSky(scene: Scene): Mesh {
   const texture = new DynamicTexture("sky-gradient", { width: 16, height: 512 }, scene, false);
   const context = texture.getContext();
   const gradient = context.createLinearGradient(0, 0, 0, 512);
-  gradient.addColorStop(0, "#18283d");
-  gradient.addColorStop(0.34, "#49677e");
-  gradient.addColorStop(0.68, "#d09a68");
-  gradient.addColorStop(1, "#f0ca91");
+  gradient.addColorStop(0, "#577996");
+  gradient.addColorStop(0.36, "#96aebe");
+  gradient.addColorStop(0.68, "#e3b584");
+  gradient.addColorStop(1, "#fae3b6");
   context.fillStyle = gradient;
   context.fillRect(0, 0, 16, 512);
   texture.update(false);
@@ -354,20 +315,27 @@ function buildSky(scene: Scene): Mesh {
 }
 
 function buildDistantHills(scene: Scene): void {
-  const far = pbr(scene, "distant-hill", new Color3(0.12, 0.15, 0.14), 1);
-  for (let i = 0; i < 13; i += 1) {
-    const x = -132 + i * 22;
-    const mountain = MeshBuilder.CreateCylinder(`distant-${i}`, {
-      height: 24 + (i % 4) * 9,
-      diameterTop: 0,
-      diameterBottom: 34 + (i % 3) * 14,
-      tessellation: 6,
+  const back = pbr(scene, "distant-hills-back", new Color3(0.15, 0.18, 0.17), 1);
+  const front = pbr(scene, "distant-hills-front", new Color3(0.2, 0.22, 0.18), 1);
+  const hills = [
+    { x: 178, z: -76, y: -14, sx: 70, sy: 31, sz: 67, material: back },
+    { x: 183, z: 45, y: -16, sx: 76, sy: 34, sz: 72, material: back },
+    { x: 145, z: -88, y: -11, sx: 55, sy: 24, sz: 58, material: front },
+    { x: 148, z: 2, y: -13, sx: 62, sy: 27, sz: 52, material: front },
+    { x: 143, z: 83, y: -12, sx: 51, sy: 23, sz: 54, material: front },
+  ] as const;
+
+  hills.forEach((hill, index) => {
+    const mesh = MeshBuilder.CreateIcoSphere(`distant-hill-${index}`, {
+      radius: 1,
+      subdivisions: 5,
     }, scene);
-    mountain.position.set(x, 2, -128 - (i % 2) * 16);
-    mountain.scaling.z = 0.65;
-    mountain.material = far;
-    mountain.isPickable = false;
-  }
+    mesh.position.set(hill.x, hill.y, hill.z);
+    mesh.scaling.set(hill.sx, hill.sy, hill.sz);
+    mesh.material = hill.material;
+    mesh.isPickable = false;
+    mesh.receiveShadows = false;
+  });
 }
 
 export function buildAbderaWorld(scene: Scene, camera: ArcRotateCamera): AbderaWorld {
@@ -407,14 +375,19 @@ export function buildAbderaWorld(scene: Scene, camera: ArcRotateCamera): AbderaW
     ground.updateVerticesData(VertexBuffer.PositionKind, positions);
     ground.createNormals(true);
   }
-  const groundMaterial = pbr(scene, "coastal-earth", new Color3(0.41, 0.3, 0.18), 0.92);
-  groundMaterial.albedoTexture = makeNoiseTexture(scene, "ground-color");
-  groundMaterial.bumpTexture = makeNoiseTexture(scene, "ground-normal", true);
-  groundMaterial.bumpTexture.level = 0.42;
+  const groundMaterial = createSurfaceMaterial(
+    scene,
+    "coastal-earth",
+    coastalGroundSet,
+    WORLD_HALF * 2 / coastalGroundSet.metersWide,
+    WORLD_HALF * 2 / coastalGroundSet.metersWide,
+    new Color3(0.74, 0.62, 0.46),
+  );
   ground.material = groundMaterial;
   ground.receiveShadows = true;
   ground.checkCollisions = true;
 
+  createAbderaEnvironment(scene);
   buildSky(scene);
   buildDistantHills(scene);
   buildSea(scene);
@@ -424,28 +397,10 @@ export function buildAbderaWorld(scene: Scene, camera: ArcRotateCamera): AbderaW
   const shrinePosition = new Vector3(62, abderaGroundHeight(62, -36), -36);
   const encounterRoot = buildRuinedShrine(scene, shadow, shrinePosition);
 
-  for (let i = 0; i < 64; i += 1) {
-    const x = -96 + hash2(i * 1.7, 4) * 190;
-    const z = -94 + hash2(8, i * 2.3) * 158;
-    const roadZ = Math.sin((x + 8) * 0.035) * 3.2;
-    const spawnDistance = Math.hypot(x + 2, z);
-    if (Math.abs(z - roadZ) < 10 || spawnDistance < 22 || Vector3.Distance(new Vector3(x, 0, z), shrinePosition) < 10) continue;
-    createRock(scene, shadow, x, z, 0.7 + hash2(i, i + 4) * 2.15, i % 4 === 0);
-  }
-
-  for (let i = 0; i < 24; i += 1) {
-    const x = -8 + hash2(i * 2.1, 20) * 94;
-    const z = -56 + hash2(31, i * 1.4) * 102;
-    const roadZ = Math.sin((x + 8) * 0.035) * 3.2;
-    if (Math.abs(z - roadZ) < 6 || Vector3.Distance(new Vector3(x, 0, z), shrinePosition) < 11) continue;
-    createOlive(scene, shadow, x, z, 0.78 + hash2(i, 51) * 0.5);
-  }
-
-  for (let i = 0; i < 15; i += 1) {
-    const x = -2 + i * 6.2;
-    const z = Math.sin((x + 8) * 0.035) * 3.2 + (i % 2 === 0 ? -7.5 : 8.5);
-    createCypress(scene, x, z, 0.72 + (i % 3) * 0.08);
-  }
+  createOliveImpostors(scene, shadow, abderaGroundHeight);
+  void loadAbderaProps(scene, shadow, abderaGroundHeight).catch((error: unknown) => {
+    console.warn("Photogrammetry props could not be loaded; procedural world remains playable.", error);
+  });
 
   // Image processing is applied inside the material shaders. Keeping it out of
   // a full-screen post-process chain avoids a Babylon 9/WebGPU startup race in
@@ -453,7 +408,7 @@ export function buildAbderaWorld(scene: Scene, camera: ArcRotateCamera): AbderaW
   const image = scene.imageProcessingConfiguration;
   image.toneMappingEnabled = true;
   image.toneMappingType = 1;
-  image.exposure = 1.04;
+  image.exposure = 1.1;
   image.contrast = 1.13;
   image.vignetteEnabled = true;
   image.vignetteWeight = 1.15;
