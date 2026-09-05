@@ -1,5 +1,18 @@
 # Metaxu visual targets
 
+## Current direction — September 2026
+
+The user requests recognizable historical Abdera, architecture, clothing and
+everyday objects, with invention where evidence is missing. Nature should be
+beautiful and slightly fantastical; photorealism is not the goal.
+
+See [historical basis and sources](abdera-study-2026-09/HISTORICAL-BASIS.md),
+[three concepts and review](abdera-study-2026-09/REVIEW.md), and
+[complete image generation prompts](abdera-study-2026-09/PROMPTS.md).
+These are exploratory concepts; camera, character designs and reconstructed
+buildings have not been approved. Earlier images below are historical project
+records, not binding visual or archaeological specifications.
+
 > Handoff update, 2026-09-05: these are earlier concepts, not final camera or
 > quality commitments. See [WINDOWS-HANDOFF.md](../WINDOWS-HANDOFF.md) for the
 > current Unity direction and visual references. Raised/isometric presentation
