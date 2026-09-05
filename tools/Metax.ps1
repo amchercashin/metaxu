@@ -19,10 +19,12 @@ switch ($Action) {
         unity --version
         dotnet --list-sdks
         [pscustomobject]@{ UnityEditor = (Test-Path $editor); Blender = (Test-Path $blender); Project = $project }
-        unity auth status
-        unity license status
+        unity pipeline list --json
     }
-    'Open' { Require-File $editor; unity open $project }
+    'Open' {
+        Require-File $editor
+        Start-Process $editor -ArgumentList @('-projectPath', ('"' + $project + '"')) -WorkingDirectory $project
+    }
     'Code' { code (Join-Path $repo 'Metax.code-workspace') }
     'Blender' {
         Require-File $blender
@@ -37,12 +39,15 @@ switch ($Action) {
         Require-File $editor
         if (Test-Path (Join-Path $project 'Temp\UnityLockfile')) { throw 'Close this Unity project before a batch operation.' }
         $method = if ($Action -eq 'Scene') {'CreateScene'} else {'BuildWindows'}
-        & $editor -batchmode -quit -projectPath $project -executeMethod "Metax.EnvironmentCheck.EnvironmentSetup.$method" -logFile (Join-Path $artifact "$Action.log")
-        if ($LASTEXITCODE -ne 0) { throw "Unity $Action failed: $LASTEXITCODE. Read artifacts/$Action.log" }
+        $log = Join-Path $artifact "$Action.log"
+        $arguments = @('-batchmode', '-quit', '-projectPath', ('"' + $project + '"'),
+            '-executeMethod', "Metax.EnvironmentCheck.EnvironmentSetup.$method", '-logFile', ('"' + $log + '"'))
+        $process = Start-Process $editor -ArgumentList $arguments -WorkingDirectory $project -WindowStyle Hidden -Wait -PassThru
+        if ($process.ExitCode -ne 0) { throw "Unity $Action failed: $($process.ExitCode). Read artifacts/$Action.log" }
     }
     'Run' {
         $exe = Join-Path $artifact 'Windows\MetaxSmoke.exe'
         Require-File $exe
-        Start-Process $exe -WindowStyle Hidden
+        Start-Process $exe
     }
 }

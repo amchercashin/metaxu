@@ -1,101 +1,123 @@
 # Рабочее окружение Windows — 5 сентября 2026
 
-**Статус: подготовка выполнена частично; редактор и полный цикл ещё не проверены.**
-Установка Blender и .NET ждёт разрешения Windows. Установщик Unity вернул
-«Операция была отменена пользователем». Вход Unity CLI завершился по тайм-ауту.
-После подтверждения установок и входа в Unity продолжить пункты ниже.
+**Готово для первого этапа разработки.** Unity и Blender запускаются, тестовая
+модель импортируется, Play Mode работает, Windows exe собран и проверен.
 
-## Рабочие папки
+## Расположение
 
 - Репозиторий: `C:\Dev\metaxu`, ветка `codex/windows-unity`.
-- Новый Unity-проект: `C:\Dev\metaxu\unity\Metaxu`.
-- Рабочее пространство VS Code: `C:\Dev\metaxu\Metax.code-workspace`.
-- Редактор (целевой путь): `C:\Dev\Tools\Unity\6000.3.23f1\Editor\Unity.exe`.
-- Blender (целевой путь): `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`.
-- Blender MCP: `C:\Dev\Tools\blender-mcp`, отдельная `.venv` с Python 3.12.12.
-- Установщик Unity и архив URP-шаблона: `D:\MetaxDownloads`.
-- Логи, проверки, Windows exe: `C:\Dev\metaxu\artifacts` (исключены из Git).
+- Unity-проект: `C:\Dev\metaxu\unity\Metaxu`.
+- VS Code: `C:\Dev\metaxu\Metax.code-workspace`.
+- Unity: `C:\Dev\Tools\Unity\6000.3.23f1\Editor\Unity.exe`.
+- Blender: `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`.
+- Blender MCP: `C:\Dev\Tools\blender-mcp`, отдельная Python 3.12.12 `.venv`.
+- Сборка: `C:\Dev\metaxu\artifacts\Windows\MetaxSmoke.exe`.
+- Установщики и архив исходного URP-шаблона: `D:\MetaxDownloads`.
 
-Компьютер: Ryzen 5 7500F, 32 ГБ RAM, RTX 5060. Перед установкой свободно
-около 229 ГиБ на C и 2077 ГиБ на D. Существующие программы не удалялись.
+Рабочие файлы и приложения размещены на быстром C, большие загрузки на D.
+Старый Babylon-прототип сохранён. Новый репозиторий пока не нужен: Unity
+изолирован в `unity/Metaxu`, концепция и история остаются рядом.
 
-## Установлено и подготовлено
+## Версии и интеграции
 
-- Git 2.53.0 и LFS 3.7.1 уже были установлены; LFS включён для этого репозитория.
-- Unity Hub 3.21.1 установлен через winget.
-- Unity CLI 1.0.0-beta.8 установлен, команда `unity --help` работает.
-- VS Code 1.110.1 уже был установлен. Добавлены Unity 1.3.1, C# 2.140.9,
-  C# Dev Kit 3.20.199, .NET Install Tool 3.1.0.
-- Blender MCP 1.9.1 закреплён на commit
-  `c5f35d9cc54451d785ac4c00c48bf9e98a2e8db9`, зависимости из его uv.lock.
-  Add-on скопирован в пользовательскую папку Blender 5.2. При первом запуске
-  его включает `tools/blender/start_mcp.py`.
-- Проект создан из официального `com.unity.template.urp-blank` 17.1.0.
-  Закреплён Unity 6000.3.23f1, URP 17.3.0, Input System 1.14.2,
-  Visual Studio Editor 2.0.28, Test Framework 1.6.0 и Unity UI 2.0.0.
-- Официальная команда `unity pipeline install` добавила
-  `com.unity.pipeline` 0.6.0-exp.1. CLI/Pipeline экспериментальные;
-  сам редактор выбран из LTS. Пакеты пока не прошли разрешение в редакторе.
-- Проект зарегистрирован в Unity Hub. Настройки MCP находятся в
-  `.codex/config.toml`: открыть именно `C:\Dev\metaxu` как проект Codex.
-  В этой уже запущенной задаче новые MCP-инструменты автоматически не появились;
-  их можно проверять через CLI/скрипты.
+| Компонент | Версия |
+| --- | --- |
+| Unity Editor LTS | 6000.3.23f1 |
+| URP | 17.3.0 |
+| Blender LTS | 5.2.1 |
+| Unity Hub | 3.21.1 |
+| Unity CLI | 1.0.0-beta.8 |
+| Unity Pipeline | 0.6.0-exp.1 |
+| VS Code | 1.110.1 |
+| VS Code Unity / C# / C# Dev Kit | 1.3.1 / 2.140.9 / 3.20.199 |
+| .NET SDK | 10.0.400 |
+| Git / LFS | 2.53.0 / 3.7.1 |
+| Blender MCP | 1.9.1 |
 
-Старый Babylon-проект сохранён как архив. Отдельный GitHub-репозиторий пока
-не нужен: новая реализация изолирована в `unity/Metaxu`, история и материалы
-остаются рядом. GitHub-коннектор просит повторный вход, но локальный Git
-успешно выполнил `push --dry-run` без запроса входа.
+В Unity закреплены Input System 1.14.2, Visual Studio Editor 2.0.28,
+Test Framework 1.6.0 и Unity UI 2.0.0. Разрешённый `packages-lock.json`
+сохранён в Git. VS Code выбран внешним редактором, решение и C#-проекты
+генерируются Unity; добавлена конфигурация Attach to Unity.
 
-## Проверено
+Blender MCP закреплён на commit `c5f35d9cc54451d785ac4c00c48bf9e98a2e8db9`.
+Аддон включён, сервер слушает localhost:9876, телеметрия аддона отключена.
+Официальный Unity Pipeline отвечает через localhost:7800. CLI и Pipeline
+имеют beta/experimental статус; редактор и Blender выбраны из LTS.
+Старый Unity AI Assistant MCP не устанавливался.
 
-- Подлинная подпись Unity Technologies и MD5 установщика совпадают
-  с официальным Unity Release API; файл полностью загружен (4 125 667 560 байт).
-- SHA1 URP-шаблона совпадает с официальным каталогом шаблонов.
-- Blender MCP: `initialize` и `tools/list` прошли, получено 28 инструментов.
-  Результат: `artifacts/blender-mcp-check.json`.
-- Синтаксис PowerShell, Python и TOML проверен. Справочные файлы обучения
-  шаблона и его устаревший packages-lock сохранены вне проекта в
-  `D:\MetaxDownloads\TemplateExtras`; актуальный lock создаст редактор.
-- **Не проверено:** запуск Blender и экспорт FBX, запуск Unity, компиляция C#,
-  загрузка пакетов, управление Unity через Pipeline, Play Mode, Windows exe.
-  Сцена ещё не создана: для неё подготовлен Editor-скрипт.
+`.codex/config.toml` содержит два MCP-сервера для этого проекта. Для следующих
+задач в Codex открыть **C:\Dev\metaxu** как проект: конфигурация привязана к
+этому корню. В текущей задаче, запущенной из C:\, подключения проверены
+отдельными MCP-клиентами и CLI. Это не требует переустановки программ.
 
-## Завершение настройки
+Unity Hub уже авторизован; редактор получил Unity Personal и успешно собрал
+игру. Blender для локальной работы аккаунта не требует. У MSIX-версий Hub
+и CLI отдельные каталоги профиля: `unity auth status` может показывать выход,
+хотя редактор лицензирован. Повторный вход CLI для обычной работы не нужен.
 
-1. Завершить установку Blender 5.2.1 и .NET SDK 10.0.400, подтвердив UAC.
-2. Повторить запуск проверенного установщика Unity с аргументами
-   `/S /D=C:\Dev\Tools\Unity\6000.3.23f1`; подтвердить UAC.
-3. Войти в Unity (`unity auth login`) и активировать Personal через
-   `unity license activate --personal --accept-eula`, если этот тип лицензии
-   подходит владельцу. Пароли и токены не сохранять в репозитории.
-4. Зарегистрировать редактор:
-   `unity editor add C:\Dev\Tools\Unity\6000.3.23f1\Editor\Unity.exe`.
-5. Выполнить `tools/Metax.ps1 Export`, затем `tools/Metax.ps1 Scene`.
-   Дождаться разрешения пакетов и сохранить созданный `packages-lock.json`.
-6. Открыть проект (`tools/Metax.ps1 Open`), проверить `unity pipeline list`,
-   коротко включить Play Mode и остановить его.
-7. Закрыть Unity-проект, выполнить `tools/Metax.ps1 Build`, запустить exe.
-   Аргумент `-metaxSmoke` перемещает объект и автоматически завершает exe
-   с кодом 0 при успехе. Без аргумента: WASD и Esc.
-8. `tools/Metax.ps1 Blender`, затем
-   `C:\Dev\Tools\blender-mcp\.venv\Scripts\python.exe tools/check_mcp.py --live`.
-   Проверка создаёт временный Empty, подтверждает его наличие и удаляет его.
-9. Обновить этот статус фактическими результатами, сохранить изменения в Git.
+## Ежедневный запуск
 
-Тестовый объект и сцена служат только проверкой окружения. Это не утверждённый
-художественный образец, камера или реализация игровых механик.
-Windows Mono достаточно для первой сборки: IL2CPP/C++ toolchain и дополнительные
-платформы сейчас не устанавливаются. Модели экспортируются в FBX; `.blend`
-лежит вне Assets, чтобы импорт не зависел от установленного Blender.
+Из PowerShell в `C:\Dev\metaxu`:
+
+```powershell
+.\tools\Metax.ps1 Open     # открыть Unity-проект
+.\tools\Metax.ps1 Code     # открыть рабочее пространство VS Code
+.\tools\Metax.ps1 Blender  # открыть Blender с локальным MCP
+.\tools\Metax.ps1 Doctor   # версии и доступность Unity Pipeline
+.\tools\Metax.ps1 Run      # открыть тестовую Windows-сборку
+```
+
+В Unity открыть `Assets/Metax/Smoke/EnvironmentCheck.unity` и нажать Play.
+WASD перемещает тестовый объект; Esc закрывает отдельную Windows-сборку.
+Перед пакетными операциями ниже закрыть этот Unity-проект:
+
+```powershell
+.\tools\Metax.ps1 Export   # создать .blend и экспортировать FBX
+.\tools\Metax.ps1 Scene    # пересоздать только тестовую сцену
+.\tools\Metax.ps1 Build    # собрать Windows x64 Mono
+```
+
+Export и Scene перезаписывают тестовые материалы: это команды проверки
+окружения, не обработка будущих игровых ассетов. Исходники Blender хранятся
+в `art/source`, экспорт FBX в Assets. Windows Mono достаточно для первого
+этапа; IL2CPP/C++ toolchain и дополнительные платформы пока не нужны.
+
+## Короткие проверки — выполнены
+
+- Подпись и MD5 установщика Unity проверены по официальному Release API;
+  SHA1 URP-шаблона проверен по каталогу Unity.
+- Blender создал `.blend` и экспортировал FBX; Unity импортировал геометрию.
+- C# скомпилирован, URP-сцена создана; в консоли редактора 0 ошибок.
+- Play Mode включён и остановлен через официальный CLI. Кадр проверен:
+  объект, материалы и освещение отображаются. `artifacts/metax-play.png`.
+- Windows x64 exe собран. Запуск с `-metaxSmoke` проверил перемещение объекта
+  и завершился с кодом 0 (`METAX_RUNTIME_SMOKE_OK`). Обычное окно игры также
+  открыто и осмотрено. Логи: `artifacts/Build.log`, `artifacts/Player.log`.
+- Blender MCP: handshake, 28 инструментов, создание и удаление временного
+  Empty через реальный Blender. `artifacts/blender-mcp-check.json`.
+- Unity MCP: handshake, 149 инструментов, чтение живого `editor_status`.
+  `artifacts/unity-mcp-check.json`.
+- VS Code подключён, Unity сгенерировал `Metaxu.slnx` и C#-проекты.
+- Git LFS настроен для `.blend`, `.fbx` и будущих крупных бинарных ассетов.
+  Library, сборки, логи и локальные файлы IDE исключены из Git.
+
+Повторная проверка MCP при открытых приложениях:
+
+```powershell
+C:\Dev\Tools\blender-mcp\.venv\Scripts\python.exe tools/check_mcp.py --live
+C:\Dev\Tools\blender-mcp\.venv\Scripts\python.exe tools/check_unity_mcp.py
+unity command --project-path C:\Dev\metaxu\unity\Metaxu editor_status --json
+```
+
+Тестовая сцена — только проверка окружения. Художественный стиль, камера,
+механики игры и окончательное название этим этапом не утверждаются.
 
 ## Источники
 
 - [Исходный перенос](https://github.com/amchercashin/metaxu/blob/main/docs/WINDOWS-HANDOFF.md).
-- [Unity Release API](https://services.api.unity.com/unity/editor/release/v1/releases?version=6000.3&limit=1&platform=WINDOWS&architecture=X86_64).
-- [Blender LTS](https://www.blender.org/download/lts/).
 - [Unity CLI](https://docs.unity.com/en-us/unity-cli/use-unity-cli).
 - [Замена старого Unity MCP](https://docs.unity.com/en-us/unity-cli/replace-mcp-server-unity-cli).
 - [Unity Pipeline](https://docs.unity.com/en-us/unity-production-pipeline/local-tools-cli/unity-pipeline-package).
+- [Blender LTS](https://www.blender.org/download/lts/).
 - [Blender MCP](https://github.com/ahujasid/blender-mcp).
 - [Unity в VS Code](https://code.visualstudio.com/docs/other/unity).
-- [MCP в Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
