@@ -1,5 +1,10 @@
 # Metaxu visual targets
 
+> Handoff update, 2026-09-05: these are earlier concepts, not final camera or
+> quality commitments. See [WINDOWS-HANDOFF.md](../WINDOWS-HANDOFF.md) for the
+> current Unity direction and visual references. Raised/isometric presentation
+> is being considered; the shoulder-height camera below is not mandatory.
+
 ## Abdera visual target v1
 
 ![Two travellers leaving Abdera](abdera-visual-target-v1.png)
