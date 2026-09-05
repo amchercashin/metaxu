@@ -9,3 +9,8 @@
 
 Ранний Godot-план и обязательный «день у реки» отменены.
 docs/bot-packet.md — архивный материал.
+
+Локальное Windows-окружение, команды и незавершённые шаги:
+[docs/WINDOWS-ENVIRONMENT.md](docs/WINDOWS-ENVIRONMENT.md).
+Не считать настройку завершённой до реального запуска Unity/Blender и короткой
+проверки Play Mode, Windows exe и подключений.

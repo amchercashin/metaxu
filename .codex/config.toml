@@ -1,0 +1,18 @@
+# Local Windows integrations for this project. Open C:/Dev/metaxu in Codex.
+[mcp_servers.metax_blender]
+command = "C:/Dev/Tools/blender-mcp/.venv/Scripts/blender-mcp.exe"
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+
+[mcp_servers.metax_blender.env]
+BLENDER_HOST = "127.0.0.1"
+BLENDER_PORT = "9876"
+DISABLE_TELEMETRY = "true"
+BLENDER_MCP_DISABLE_TELEMETRY = "true"
+PYTHONUTF8 = "1"
+
+[mcp_servers.metax_unity]
+command = "C:/Users/amche/AppData/Local/Microsoft/WindowsApps/unity.exe"
+args = ["mcp", "--project-path", "C:/Dev/metaxu/unity/Metaxu"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120

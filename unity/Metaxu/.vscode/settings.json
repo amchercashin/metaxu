@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "**/*.meta": true,
+    "Library": true,
+    "Temp": true,
+    "Logs": true,
+    "obj": true
+  },
+  "search.exclude": { "Library": true, "Temp": true, "Logs": true }
+}
